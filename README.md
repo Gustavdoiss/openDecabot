@@ -1,5 +1,5 @@
 # openDecabot
-The easiest 3D printed robot you can assemble and program using Wemos D1 Mini Shields and Arduino IDE, powered by ESP8266. 
+The easiest 3D printed robot you can assemble and program using Wemos D1 Mini Shields and Arduino IDE, powered by ESP8266. Made in Brazil, _Coisado no Ceará_.
 
 **Assembly Instructions on WIKI http://github.com/triwaca/openDecabot/wiki**
 
@@ -73,7 +73,7 @@ Some sketches uses libraries who must be installed before. See instructions on e
 
 ## 3D project source
 The 3D source project was all designed on Tinkercad (yes!), and can be forked using the link below:
-https://www.tinkercad.com/things/dYy4XWihfYu-opendecabot-mini-v10
+[https://www.tinkercad.com/things/cXxCpU8HWDP-opendecabot-mini-v13](https://www.tinkercad.com/things/cXxCpU8HWDP-opendecabot-mini-v13)
 
 ![Decabot robot on Tinkercad](images/openDecabot_3d.png)
 
