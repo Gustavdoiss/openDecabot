@@ -43,7 +43,7 @@
 
 MLED matrix(7); // intensidade 7 (máximo)
 
-int slowSpeed = 50; //number between 1 and 180 max.
+int slowSpeed = 100; //number between 1 and 180 max.
 int fastSpeed = 100; //number between 1 and 180 max.
 //To vcalibrate motors: Positive mnumbers give more right movement
 int calibration = 0; //number between -50 and 50 to balance motors
@@ -52,6 +52,8 @@ int lpos = 1; // posição olho esquerdo
 int rpos = 6; // posição olho direito
 int aleat = 5;
 
+bool awake = false;
+
 const char *ssid = "MeuDecabot";
 const char *password = "";
 Servo servo0;
@@ -59,6 +61,8 @@ Servo servo6;
 
 //sounds
 const int decabotMusic[4][3]{ { 494, 2, 3 }, { 554, 2, 4 }, { 440, 2, 5 }, { 880, 1, 6 } };
+static const uint8_t PROGMEM decabotLogo[4][5] = {{0b11001110,0b10101000,0b10101100,0b10101000,0b11001110},{0b00110010,0b01000101,0b01000111,0b01000101,0b00110101},{0b11000100,0b10101010,0b11001010,0b10101010,0b11000100},{0b01110100,0b00100100,0b00100100,0b00100000,0b00100100}};
+
 
 DNSServer dnsServer;
 const byte DNS_PORT = 53;
@@ -77,7 +81,9 @@ void motorLeft(int pot){
   if(pot ==0){
     servo0.write(90);
   } else {
-    servo0.write(90 + map(pot,-100,100,fastSpeed-calibration,-fastSpeed-calibration));
+    int vel = 90 + map(pot,-100,100,fastSpeed-calibration,-fastSpeed-calibration);
+    servo0.write(vel);
+    Serial.print("L" + (String)vel + " ");
   }
 }
 
@@ -86,11 +92,17 @@ void motorRight(int pot){
   if(pot == 0){
     servo6.write(90);
   } else {
-    servo6.write(90 - map(pot,-100,100,fastSpeed+calibration,-fastSpeed+calibration));
+    int vel = 90 - map(pot,-100,100,fastSpeed+calibration,-fastSpeed+calibration);
+    servo6.write(vel);
+    Serial.println("R" + (String)vel);
   }
 }
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println();
+  Serial.println("Decabot");
   pinMode(buzzer, OUTPUT);
   matrix.setRotation(2);
   servo0.attach(D0);
@@ -111,6 +123,7 @@ void setup() {
 
   // Página raiz (cativa)
   server.on("/", HTTP_GET, [myIP](AsyncWebServerRequest *request) {
+    awake = true;
     String ipStr = myIP.toString();
     String html = R"rawliteral(
 <!DOCTYPE html>
@@ -299,58 +312,69 @@ void setup() {
   server.onNotFound(notFound);
   server.begin();
   for (int i = 0; i < 4; i++) {
+    matrix.clear();
+    matrix.drawBitmap(0, 2, decabotLogo[i] , 8, 5, LED_ON);
+    matrix.writeDisplay();
     tone(buzzer, decabotMusic[i][0], decabotMusic[i][1] * 200);
     delay(decabotMusic[i][1] * 200);
     noTone(buzzer);
   }
+  delay(500);
+  matrix.clear();
 }
 
 void loop() {
   dnsServer.processNextRequest();
 
-  // animação dos olhos + buzzer (mantida)
-  matrix.clear();
-  matrix.drawLine(lpos, 2, lpos, 7, LED_ON);
-  matrix.drawLine(rpos, 2, rpos, 7, LED_ON);
-  matrix.writeDisplay();
-  delay(1000);
+  if(awake){
+    // animação dos olhos + buzzer (mantida)
+    matrix.clear();
+    matrix.drawLine(lpos, 2, lpos, 7, LED_ON);
+    matrix.drawLine(rpos, 2, rpos, 7, LED_ON);
+    matrix.writeDisplay();
+    delay(1000);
 
-  // efeito de piscar
-  for (int j = 0; j < random(3); j++) {
-    for (int i = 2; i < 7; i++) {
-      matrix.clear();
-      matrix.drawLine(lpos, i, lpos, 7, LED_ON);
-      matrix.drawLine(rpos, i, rpos, 7, LED_ON);
-      matrix.writeDisplay();
-      digitalWrite(buzzer, HIGH);
+    // efeito de piscar
+    for (int j = 0; j < random(3); j++) {
+      for (int i = 2; i < 7; i++) {
+        matrix.clear();
+        matrix.drawLine(lpos, i, lpos, 7, LED_ON);
+        matrix.drawLine(rpos, i, rpos, 7, LED_ON);
+        matrix.writeDisplay();
+        digitalWrite(buzzer, HIGH);
+        delay(15);
+        digitalWrite(buzzer, LOW);
+        delay(15);
+      }
+      for (int i = 7; i > 2; i--) {
+        matrix.clear();
+        matrix.drawLine(lpos, i, lpos, 7, LED_ON);
+        matrix.drawLine(rpos, i, rpos, 7, LED_ON);
+        matrix.writeDisplay();
+        digitalWrite(buzzer, HIGH);
+        delay(15);
+        digitalWrite(buzzer, LOW);
+        delay(15);
+      }
+    }
+  
+    // olhar para os lados
+    aleat = random(10);
+    if (aleat < 2) {
+      lpos = 0;
+      rpos = 5;
+    } else if (aleat > 7) {
+      lpos = 2;
+      rpos = 7;
       delay(15);
-      digitalWrite(buzzer, LOW);
+    } else {
+      lpos = 1;
+      rpos = 6;
       delay(15);
     }
-    for (int i = 7; i > 2; i--) {
-      matrix.clear();
-      matrix.drawLine(lpos, i, lpos, 7, LED_ON);
-      matrix.drawLine(rpos, i, rpos, 7, LED_ON);
-      matrix.writeDisplay();
-      digitalWrite(buzzer, HIGH);
-      delay(15);
-      digitalWrite(buzzer, LOW);
-      delay(15);
-    }
-  }
-
-  // olhar para os lados
-  aleat = random(10);
-  if (aleat < 2) {
-    lpos = 0;
-    rpos = 5;
-  } else if (aleat > 7) {
-    lpos = 2;
-    rpos = 7;
-    delay(15);
   } else {
-    lpos = 1;
-    rpos = 6;
-    delay(15);
+    matrix.drawLine(0, 7, 2, 7, LED_ON);
+    matrix.drawLine(5, 7, 7, 7, LED_ON);
+    matrix.writeDisplay();
   }
 }
