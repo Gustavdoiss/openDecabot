@@ -43,8 +43,8 @@
 
 MLED matrix(7); // intensidade 7 (máximo)
 
-int slowSpeed = 100; //number between 1 and 180 max.
-int fastSpeed = 100; //number between 1 and 180 max.
+int slowSpeed = 40; //number between 1 and 180 max.
+int fastSpeed = 60; //number between 1 and 180 max.
 //To vcalibrate motors: Positive mnumbers give more right movement
 int calibration = 0; //number between -50 and 50 to balance motors
 
@@ -79,9 +79,9 @@ void notFound(AsyncWebServerRequest *request) {
 void motorLeft(int pot){
   //run motor on power -100 to 100
   if(pot ==0){
-    servo0.write(90);
+    servo0.write(93);
   } else {
-    int vel = 90 + map(pot,-100,100,fastSpeed-calibration,-fastSpeed-calibration);
+    int vel = 93 + map(pot,-100,100,fastSpeed-calibration,-fastSpeed-calibration);
     servo0.write(vel);
     Serial.print("L" + (String)vel + " ");
   }
@@ -90,9 +90,9 @@ void motorLeft(int pot){
 void motorRight(int pot){
   //run motor on power -100 to 100
   if(pot == 0){
-    servo6.write(90);
+    servo6.write(93);
   } else {
-    int vel = 90 - map(pot,-100,100,fastSpeed+calibration,-fastSpeed+calibration);
+    int vel = 93 - map(pot,-100,100,fastSpeed+calibration,-fastSpeed+calibration);
     servo6.write(vel);
     Serial.println("R" + (String)vel);
   }
