@@ -76,25 +76,24 @@ void notFound(AsyncWebServerRequest *request) {
   request->redirect("/");
 }
 
-void motorLeft(int pot){
-  //run motor on power -100 to 100
-  if(pot ==0){
-    servo0.write(93);
+int neutralLeft  = 93;
+int neutralRight = 93;
+
+void motorLeft(int pot) {
+  if (pot == 0) {
+    servo0.write(neutralLeft);
   } else {
-    int vel = 93 + map(pot,-100,100,fastSpeed-calibration,-fastSpeed-calibration);
+    int vel = neutralLeft + map(pot, -100, 100, fastSpeed, -fastSpeed);
     servo0.write(vel);
-    Serial.print("L" + (String)vel + " ");
   }
 }
 
-void motorRight(int pot){
-  //run motor on power -100 to 100
-  if(pot == 0){
-    servo6.write(93);
+void motorRight(int pot) {
+  if (pot == 0) {
+    servo6.write(neutralRight);
   } else {
-    int vel = 93 - map(pot,-100,100,fastSpeed+calibration,-fastSpeed+calibration);
+    int vel = neutralRight - map(pot, -100, 100, fastSpeed, -fastSpeed);
     servo6.write(vel);
-    Serial.println("R" + (String)vel);
   }
 }
 
