@@ -39,6 +39,7 @@
 #include <Servo.h>
 #include <Adafruit_GFX.h>       // tested on 1.11.10
 #include <WEMOS_Matrix_GFX.h>   // tested on 1.4.0iu332
+#include <ArduinoOTA.h>   //Biblioteca para OTA
 #define buzzer D8
 
 MLED matrix(7); // intensidade 7 (máximo)
@@ -114,6 +115,21 @@ void setup() {
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);
+  ArduinoOTA.setHostname("MeuDecabot");
+  ArduinoOTA.setPassword(""); // senha para proteger o upload
+    
+  ArduinoOTA.onStart([]() {
+    Serial.println("Iniciando OTA...");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nOTA concluído!");
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Erro OTA [%u]\n", error);
+  });
+  
+  ArduinoOTA.begin();
+
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
@@ -361,6 +377,7 @@ void setup() {
 }
 
 void loop() {
+  ArduinoOTA.handle();  // ← sempre a primeira linha
   dnsServer.processNextRequest();
 
   if(awake){
